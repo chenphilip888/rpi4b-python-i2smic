@@ -1,0 +1,144 @@
+Python i2s experiments on Raspberry PI 4B board.
+
+The following 5 tests are included: ( see below for tests summary )
+1. speech_recog.py
+2. sound_recorder.py
+3. i2s_wavefile.py
+4. i2s_lcd.py
+5. i2s_servo.py
+
+-------------------------------------------------------------------
+
+To compile and flash to sd card:
+
+cd rpi4b-python-i2smic
+Download OS:
+wget https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2020-12-04/2020-12-02-raspios-buster-armhf-lite.zip
+unzip 2020-12-02-raspios-buster-armhf-lite.zip
+Use balenaEtcher to burn img to sd card.
+eject sd card.
+Plugin sd card to PC.
+To enable I2S add dtparam=i2s=on in /boot/config.txt
+sudo cp config.txt /media/$USER/boot
+sync
+sudo umount /media/$USER/boot
+eject sd card.
+Plugin the sd card to Raspberry PI 4B board.
+Connect gpio Pin 8 to serial USB cable TX.
+Connect gpio pin 10 to serial USB cable RX. 
+Connect gpio pin 39 to serial USB cable ground. 
+Type "script ~/outputfile.txt" on PC.
+Plugin serial USB cable to PC.
+Type "sudo screen /dev/ttyUSB0 115200" on PC.
+Power on Raspberry PI 4B board.
+It should prompt login message.
+user pi
+password raspberry
+sudo raspi-config
+set password, wifi, locale, timezone, peripheral etc.
+vi nosleep.sh ( add following line to disable sleep feature )
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.ta
+rget
+./nosleep.sh
+sudo dmesg -n 1
+sudo vi /etc/rc.local ( add sudo dmesg -n 1 )
+sudo ifconfig
+sudo apt-get update
+sudo apt-get upgrade
+sync
+sudo reboot
+./nosleep.sh
+sudo apt-get install python-dev python-pip python-setuptools python3-dev python3-pip python3-setuptools dnsutils apache2 vsftpd ftp pavucontrol libportaudio0 libportaudio2 libportaudiocpp0 portaudio19-dev libasound2-dev flac python-smbus
+sudo apt-get remove --purge pulseaudio
+sudo pip install pyaudio
+sudo pip install SpeechRecognition
+sudo pip3 install --upgrade adafruit-python-shell
+wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/i2smic.py
+sudo python3 i2smic.py
+./nosleep.sh
+lsmod
+cp asoundrc ~/.asoundrc
+sudo cp ~/.asoundrc /etc/asound.conf
+sudo /etc/init.d/alsa-utils restart
+
+sudo cat /proc/device-tree/soc/i2c@7e804000/status
+sudo cat /proc/device-tree/soc/pwm@7e20c000/status
+ls /sys/class/pwm
+sudo apt-get install i2c-tools
+sudo i2cdetect -y 1
+
+Download gpio library on Raspberry PI 4B board:
+wget https://project-downloads.drogon.net/wiringpi-latest.deb
+sudo dpkg -i wiringpi-latest.deb
+gpio -v      ( make sure it's v2.52 or above )
+gpio readall
+
+-------------------------------------------------------------------------
+
+Here are the summary of the tests: 
+
+See GPIO-Pinout-rpi4b.png and https://www.raspberrypi.org/documentation/usage/gpio
+These tests used Seeed Grove-LCD RGB Backlight V3.0 JHD1313M2, Analog Servo and Adafruit SPH0645 I2S Mic.
+To use Adafruit SPH0645 I2S Mic see https://learn.adafruit.com/adafruit-i2s-mems-microphone-breakout/overview
+
+I2C_Mic:
+   Connect LRCL to pin 35
+   Connect DOUT to pin 38
+   Connect BCLK to pin 12
+   Connect GND  to pin 9
+   Connect 3V   to pin 1
+I2C_LCD:
+   Connect gpio pin 3 to lcd display SDA.
+   Connect gpio pin 5 to lcd display SCL.
+   Connect gpio pin 2 to lcd display 5V.
+   Connect gpio pin 6 to lcd display ground.
+Servo:
+   Connect gpio pin 33 to servo control.
+   Connect gpio pin 4 to servo 5V.
+   Connect gpio pin 14 to servo ground.
+
+1. speech_recog.py
+   Speak to Microphone for 3 seconds. It will print what you said.
+
+2. sound_recorder.py
+   Speak to Microphone for 3 seconds. It will save sound to 'file.wav'.
+
+3. i2s_wavefile.py
+   It will read 'file.wav' and print what you said in 'file.wav'.
+
+4. i2s_lcd.py
+   Speak to Microphone for colors of your choice. It will display colors of your choice to LCD background color.
+
+5. i2s_servo.py
+   You can command servo to turn right, left or stay in the middle by speaking to Microphone.
+
+-----------------------------------------------------------------------------
+
+Here are the procedure to test the above 5 tests:
+
+cat /proc/asound/cards
+arecord -l
+arecord -D dmic_sv -c2 -r 44100 -f S32_LE -t wav -V mono -v file.wav
+alsamixer  ( adjust volume to 66% )
+
+arecord -D dmic_sv -c2 -r 44100 -f S32_LE -t wav -V mono -v file.wav
+arecord -c2 -r 44100 -f S32_LE -t wav -V mono -v file.wav
+
+\rm .config/pulse/*
+sudo \rm /etc/alsa/conf.d/*
+sudo vi /usr/share/alsa/alsa.conf  ( commented out pcm.cards and 21 lines below it )
+
+cd ~/rpi4b-python-i2smic
+./speech_recog.py
+./sound_recorder.py
+./i2s_wavefile.py
+./i2s_lcd.py
+./i2s_servo.py
+
+When done all tests:
+sudo shutdown -h now
+Power off Raspberry PI 4B board.
+Unplug serial USB cable from PC.
+Type "exit" on PC.
+
+------------------------------------------------------------------------------
