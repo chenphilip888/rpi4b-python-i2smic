@@ -49,7 +49,9 @@ sync
 sudo reboot
 ./nosleep.sh
 sudo apt-get install python-dev python-pip python-setuptools python3-dev python3-pip python3-setuptools dnsutils apache2 vsftpd ftp pavucontrol libportaudio0 libportaudio2 libportaudiocpp0 portaudio19-dev libasound2-dev flac python-smbus
+sync
 sudo apt-get remove --purge pulseaudio
+sudo apt autoremove
 sudo pip install pyaudio
 sudo pip install SpeechRecognition
 sudo pip3 install --upgrade adafruit-python-shell
@@ -57,7 +59,8 @@ wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/m
 sudo python3 i2smic.py
 ./nosleep.sh
 lsmod
-cp asoundrc ~/.asoundrc
+git clone https://github.com/chenphilip888/rpi4b-python-i2smic.git
+cp ~/rpi4b-python-i2smic/asoundrc ~/.asoundrc
 sudo cp ~/.asoundrc /etc/asound.conf
 sudo /etc/init.d/alsa-utils restart
 
