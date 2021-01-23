@@ -84,7 +84,7 @@ See GPIO-Pinout-rpi4b.png and https://www.raspberrypi.org/documentation/usage/gp
 These tests used Seeed Grove-LCD RGB Backlight V3.0 JHD1313M2, Analog Servo and Adafruit SPH0645 I2S Mic.
 To use Adafruit SPH0645 I2S Mic see https://learn.adafruit.com/adafruit-i2s-mems-microphone-breakout/overview
 
-I2C_Mic:
+I2S_Mic:
    Connect LRCL to pin 35
    Connect DOUT to pin 38
    Connect BCLK to pin 12
